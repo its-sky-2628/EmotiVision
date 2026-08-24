@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SentimentLab</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --ink: #17232d;
+    --muted: #78828a;
+    --paper: #f4f1eb;
+    --white: #fffdf9;
+    --line: #ddd8cf;
+    --blue: #315d70;
+    --green: #47745d;
+    --red: #9b5252;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 15% 10%, rgba(49,93,112,.07), transparent 28%),
+        radial-gradient(circle at 90% 90%, rgba(71,116,93,.06), transparent 25%),
+        var(--paper);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ================= HEADER ================= */
+
+header {
+    height: 76px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255,253,249,.85);
+    backdrop-filter: blur(12px);
+}
+
+.header-inner {
+    width: min(1180px, 92%);
+    height: 100%;
+    margin: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: -.5px;
+}
+
+.logo span {
+    color: var(--blue);
+}
+
+.model-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #69747c;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(71,116,93,.09);
+}
+
+/* ================= PAGE ================= */
+
+.page {
+    width: min(1180px, 92%);
+    margin: auto;
+    padding: 65px 0 55px;
+}
+
+.heading {
+    margin-bottom: 45px;
+}
+
+.heading small {
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.heading h1 {
+    margin: 12px 0 12px;
+
+    font-family: Georgia, serif;
+    font-size: clamp(38px, 5vw, 65px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -3px;
+}
+
+.heading p {
+    max-width: 600px;
+    margin: 0;
+
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* ================= WORKSPACE ================= */
+
+.workspace {
+    display: grid;
+    grid-template-columns: 1.35fr .85fr;
+    min-height: 530px;
+
+    background: var(--white);
+    border: 1px solid var(--line);
+    box-shadow: 0 25px 65px rgba(28,36,42,.09);
+}
+
+/* ================= LEFT PANEL ================= */
+
+.input-panel {
+    padding: 34px;
+    border-right: 1px solid var(--line);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+}
+
+.panel-heading h2 {
+    margin: 0;
+
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.panel-number {
+    color: #9ba0a2;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.text-editor {
+    flex: 1;
+
+    border: 1px solid var(--line);
+    background: #faf8f3;
+
+    position: relative;
+}
+
+textarea {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+
+    resize: none;
+    border: 0;
+    outline: 0;
+
+    padding: 25px;
+
+    background: transparent;
+
+    color: var(--ink);
+
+    font-family: Georgia, serif;
+    font-size: 19px;
+    line-height: 1.75;
+}
+
+textarea::placeholder {
+    color: #aaa69e;
+}
+
+.editor-footer {
+    margin-top: 18px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.character-count {
+    color: #999c9d;
+    font-size: 11px;
+}
+
+.analyze-btn {
+    border: 0;
+    padding: 14px 24px;
+
+    color: white;
+    background: var(--ink);
+
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: .5px;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.analyze-btn:hover {
+    background: var(--blue);
+    transform: translateY(-1px);
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.result-panel {
+    padding: 34px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fffdf9,
+            #f7f4ee
+        );
+
+    display: flex;
+    flex-direction: column;
+}
+
+.result-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+}
+
+.result-top h2 {
+    margin: 0;
+
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.result-index {
+    color: #aaa59c;
+    font-size: 11px;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.empty-inner {
+    max-width: 260px;
+}
+
+.empty-icon {
+    width: 62px;
+    height: 62px;
+
+    margin: 0 auto 20px;
+
+    border: 1px solid #d8d3ca;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #858c90;
+    font-family: Georgia, serif;
+    font-size: 25px;
+}
+
+.empty-inner h3 {
+    margin: 0 0 10px;
+
+    font-family: Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.empty-inner p {
+    margin: 0;
+
+    color: #8a9094;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* RESULT CONTENT */
+
+.result-content {
+    display: none;
+    flex: 1;
+    padding-top: 40px;
+
+    animation: reveal .45s ease;
+}
+
+@keyframes reveal {
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.result-caption {
+    color: #8a9094;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+.result-sentiment {
+    margin: 13px 0 8px;
+
+    font-family: Georgia, serif;
+    font-size: 45px;
+    font-weight: 400;
+}
+
+.result-description {
+    margin: 0;
+
+    color: #737c82;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.confidence-box {
+    margin-top: 45px;
+}
+
+.confidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.confidence-header span:first-child {
+    color: #7e8589;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1.4px;
+}
+
+.confidence-value {
+    color: var(--blue);
+    font-family: Georgia, serif;
+    font-size: 28px;
+}
+
+.confidence-track {
+    height: 6px;
+    margin-top: 12px;
+
+    overflow: hidden;
+
+    background: #e3dfd7;
+}
+
+.confidence-fill {
+    width: 0;
+    height: 100%;
+
+    background: var(--blue);
+
+    transition: width 1s cubic-bezier(.22,1,.36,1);
+}
+
+.result-note {
+    margin-top: auto;
+    padding-top: 25px;
+
+    border-top: 1px solid var(--line);
+
+    color: #898f92;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+    width: min(1180px, 92%);
+    margin: 28px auto 0;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: #98958e;
+    font-size: 10px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 800px) {
+
+    .page {
+        padding-top: 40px;
+    }
+
+    .heading h1 {
+        letter-spacing: -2px;
+    }
+
+    .workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .input-panel {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .result-panel {
+        min-height: 470px;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .model-status {
+        display: none;
+    }
+
+    .page {
+        width: 94%;
+    }
+
+    .input-panel,
+    .result-panel {
+        padding: 22px;
+    }
+
+    .heading {
+        margin-bottom: 30px;
+    }
+
+    .heading h1 {
+        font-size: 42px;
+    }
+
+    textarea {
+        min-height: 250px;
+        font-size: 17px;
+    }
+
+    .editor-footer {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .analyze-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<style>
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.emoti-right-visual {
+    position: absolute !important;
+    top: 70px !important;
+    right: 0 !important;
+    width: 52% !important;
+    height: 700px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    z-index: 3 !important;
+    pointer-events: none !important;
+}
+
+.emoti-right-visual img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 780px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center right !important;
+    transform: none !important;
+}
+
+@media (max-width: 900px) {
+    .emoti-right-visual {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        margin-top: 30px !important;
+        justify-content: center !important;
+    }
+
+    .emoti-right-visual img {
+        width: 100% !important;
+        max-width: 650px !important;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="emoti-right-visual">
+<img src="/static/Right.png" alt="Emotion Detection">
+</div>
+
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="logo">
+            Sentiment<span>Lab</span>
+        </div>
+
+        <div class="model-status">
+            <span class="status-dot"></span>
+            Model Online
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="page">
+
+    <section class="heading">
+
+        <small>Natural Language Intelligence</small>
+
+        <h1>
+            Read between<br>
+            the lines.
+        </h1>
+
+        <p>
+            Enter any sentence, review, or passage.
+            The model evaluates the emotional tone and
+            returns its predicted sentiment with confidence.
+        </p>
+
+    </section>
+
+
+    <section class="workspace">
+
+        <!-- LEFT -->
+
+        <div class="input-panel">
+
+            <div class="panel-heading">
+
+                <h2>Input Text</h2>
+
+                <span class="panel-number">
+                    01 / INPUT
+                </span>
+
+            </div>
+
+
+            <div class="text-editor">
+
+                <textarea
+                    id="text"
+                    name="text"
+                    placeholder="Start writing here..."
+                    maxlength="5000"
+                ></textarea>
+
+            </div>
+
+
+            <div class="editor-footer">
+
+                <span
+                    class="character-count"
+                    id="counter"
+                >
+                    0 / 5000
+                </span>
+
+                <button
+                    class="analyze-btn"
+                    id="analyze"
+                    type="button"
+                >
+                    ANALYZE SENTIMENT →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT -->
+
+        <div class="result-panel">
+
+            <div class="result-top">
+
+                <h2>Analysis</h2>
+
+                <span class="result-index">
+                    02 / RESULT
+                </span>
+
+            </div>
+
+
+            <!-- Before analysis -->
+
+            <div
+                class="empty-state"
+                id="empty-state"
+            >
+
+                <div class="empty-inner">
+
+                    <div class="empty-icon">
+                        ∑
+                    </div>
+
+                    <h3>
+                        Awaiting analysis
+                    </h3>
+
+                    <p>
+                        Your prediction will appear
+                        here after the text has been analyzed.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- After analysis -->
+
+            <div
+                class="result-content"
+                id="result-content"
+            >
+
+                <div class="result-caption">
+                    Predicted Sentiment
+                </div>
+
+                <div
+                    class="result-sentiment"
+                    id="sentiment"
+                >
+                    Positive
+                </div>
+
+                <p
+                    class="result-description"
+                    id="description"
+                >
+                    The model identifies a positive emotional tone
+                    in the provided text.
+                </p>
+
+
+                <div class="confidence-box">
+
+                    <div class="confidence-header">
+
+                        <span>
+                            MODEL CONFIDENCE
+                        </span>
+
+                        <span
+                            class="confidence-value"
+                            id="confidence"
+                        >
+                            0%
+                        </span>
+
+                    </div>
+
+
+                    <div class="confidence-track">
+
+                        <div
+                            class="confidence-fill"
+                            id="confidence-fill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-note">
+                    Prediction generated by the trained
+                    machine learning sentiment classifier.
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <span>SentimentLab</span>
+
+    <span>Machine Learning Analysis System</span>
+
+</footer>
+
+
+<script>
+
+const textInput = document.getElementById("text");
+
+const counter = document.getElementById("counter");
+
+const analyzeButton = document.getElementById("analyze");
+
+const emptyState = document.getElementById("empty-state");
+
+const resultContent = document.getElementById("result-content");
+
+const sentiment = document.getElementById("sentiment");
+
+const description = document.getElementById("description");
+
+const confidence = document.getElementById("confidence");
+
+const confidenceFill =
+    document.getElementById("confidence-fill");
+
+
+/* CHARACTER COUNTER */
+
+textInput.addEventListener("input", function() {
+
+    counter.textContent =
+        textInput.value.length + " / 5000";
+
+});
+
+
+/* ANALYZE */
+
+analyzeButton.addEventListener("click", async function() {
+
+    const text = textInput.value.trim();
+
+    if (!text) {
+
+        textInput.focus();
+
+        return;
+
+    }
+
+
+    analyzeButton.disabled = true;
+
+    analyzeButton.textContent = "ANALYZING...";
+
+
+    try {
+
+        const response = await fetch(
+            "/api/predict",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || data.error) {
+
+            throw new Error(
+                data.error || "Prediction failed"
+            );
+
+        }
+
+
+        /*
+         * Supports different backend response names.
+         */
+
+        const label =
+            data.sentiment ||
+            data.prediction ||
+            data.label ||
+            "Unknown";
+
+
+        const rawProbability =
+            data.confidence ??
+            data.probability ??
+            data.score ??
+            0;
+
+
+        let percent =
+            Number(rawProbability);
+
+
+        if (percent <= 1) {
+            percent *= 100;
+        }
+
+
+        percent = Math.max(
+            0,
+            Math.min(100, percent)
+        );
+
+
+        sentiment.textContent = label;
+
+
+        confidence.textContent =
+            percent.toFixed(1) + "%";
+
+
+        confidenceFill.style.width =
+            percent + "%";
+
+
+        const normalized =
+            String(label).toLowerCase();
+
+
+        if (normalized.includes("positive")) {
+
+            sentiment.style.color =
+                "#47745d";
+
+            confidenceFill.style.background =
+                "#47745d";
+
+            description.textContent =
+                "The model identifies a positive emotional tone in the provided text.";
+
+        }
+
+        else if (normalized.includes("negative")) {
+
+            sentiment.style.color =
+                "#9b5252";
+
+            confidenceFill.style.background =
+                "#9b5252";
+
+            description.textContent =
+                "The model identifies a negative emotional tone in the provided text.";
+
+        }
+
+        else {
+
+            sentiment.style.color =
+                "#315d70";
+
+            confidenceFill.style.background =
+                "#315d70";
+
+            description.textContent =
+                "The model identifies a neutral or mixed emotional tone in the provided text.";
+
+        }
+
+
+        emptyState.style.display = "none";
+
+        resultContent.style.display = "block";
+
+
+    }
+
+    catch (error) {
+
+        alert(
+            "Unable to connect to the prediction server."
+        );
+
+        console.error(error);
+
+    }
+
+    finally {
+
+        analyzeButton.disabled = false;
+
+        analyzeButton.textContent =
+            "ANALYZE SENTIMENT →";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

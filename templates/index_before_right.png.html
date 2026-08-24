@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmotiVision — AI Emotion Detector</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+ --dark:#111827;--muted:#69717d;--pink:#d83d8d;--orange:#f47d55;
+ --cream:#faf7f2;--white:#fff;--line:#eee7df;
+}
+body{
+ margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--dark);
+ background:radial-gradient(circle at 80% 20%,#ffdce5 0,transparent 30%),
+ radial-gradient(circle at 20% 70%,#fff0dc 0,transparent 28%),var(--cream);
+ min-height:100vh;
+}
+header{
+ height:82px;position:relative;z-index:1000;display:flex;align-items:center;justify-content:space-between;
+ padding:0 4%;background:rgba(255,255,255,.72);backdrop-filter:blur(15px);
+ border-bottom:1px solid rgba(220,210,200,.5);
+}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:21px}
+.logo-icon{
+ width:42px;height:42px;border:2px solid var(--pink);border-radius:13px;
+ display:grid;place-items:center;color:var(--pink);font-size:22px
+}
+.logo small{display:block;color:#777;font-size:11px;font-weight:400;margin-top:2px}
+nav{display:flex;gap:34px;align-items:center;height:100%}
+nav a{color:#333;text-decoration:none;font-size:14px}
+nav a.active{font-weight:700;position:relative} nav a.active:after{content:"";position:absolute;left:0;right:0;bottom:-30px;height:3px;background:linear-gradient(90deg,#9d38dc,#ef6b62);border-radius:3px}
+.sign{padding:12px 20px;border-radius:12px;background:#fff;border:1px solid #eee}
+.start{
+ padding:13px 22px;border:0;border-radius:12px;color:#fff;font-weight:700;
+ background:linear-gradient(90deg,#9d38dc,#ef6b62);cursor:pointer
+}
+.hero{max-width:1400px;margin:auto;padding:55px 4% 35px;display:grid;grid-template-columns:48% 52%;align-items:center;min-height:650px;position:relative}
+.badge{
+ display:inline-block;padding:10px 18px;border-radius:30px;
+ background:#ffe9e5;color:#a83e47;font-size:13px;font-weight:600
+}
+h1{
+ font-size:clamp(48px,6vw,78px);line-height:1.02;letter-spacing:-4px;
+ margin:25px 0 22px;max-width:650px
+}
+.gradient{background:linear-gradient(90deg,#bd318c,#f16e57);color:transparent;background-clip:text}
+.subtitle{font-size:18px;line-height:1.7;color:#555;max-width:600px}
+.buttons{display:flex;gap:15px;margin-top:30px}
+.btn{
+ border:0;padding:16px 25px;border-radius:13px;font-weight:700;font-size:14px;cursor:pointer
+}
+.primary{background:#151c27;color:white}
+.secondary{background:#fff;border:1px solid #e5ddd5}
+.workspace{
+ max-width:1400px;margin:0 auto 40px;padding:0 4%;
+ display:grid;grid-template-columns:1.55fr .75fr;gap:25px
+}
+.camera-card,.result-card{
+ background:rgba(255,255,255,.85);border:1px solid var(--line);
+ border-radius:25px;padding:22px;box-shadow:0 20px 60px rgba(40,30,30,.08)
+}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.card-head h2{margin:0;font-size:19px}
+.live{font-size:11px;font-weight:700;color:#ca3d65}
+.live:before{content:"";display:inline-block;width:7px;height:7px;background:#e54867;border-radius:50%;margin-right:6px}
+.video-wrap{
+ position:relative;background:#171b22;border-radius:18px;overflow:hidden;aspect-ratio:16/10
+}
+video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
+.face-box{
+ position:absolute;display:none;border:3px solid white;border-radius:18px;
+ width:45%;height:65%;left:27.5%;top:18%;box-shadow:0 0 0 1px rgba(215,50,130,.5)
+}
+.scan{
+ position:absolute;left:0;right:0;top:0;height:2px;background:#f35c9e;
+ animation:scan 2s linear infinite;display:none
+}
+@keyframes scan{from{top:5%}to{top:95%}}
+.camera-message{
+ position:absolute;inset:0;display:grid;place-items:center;color:#fff;
+ background:rgba(0,0,0,.3);text-align:center
+}
+.camera-message span{display:block;font-size:13px;margin-top:8px}
+.camera-controls{display:flex;gap:12px;margin-top:15px}
+.camera-controls button{flex:1;padding:13px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-weight:700}
+.camera-controls button:first-child{background:#151c27;color:#fff}
+.overall{
+ text-align:center;padding:20px 10px 12px;border-bottom:1px solid var(--line)
+}
+.emoji{font-size:64px}
+.emotion-name{font-size:35px;font-weight:800;margin:7px 0}
+.conf{font-size:14px;color:#777}.conf strong{color:#222;font-size:18px}
+.bar{height:8px;background:#eee5dd;border-radius:10px;margin:13px 5px;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#bd38cf,#ff9a51);transition:width .5s}
+.emotions{margin-top:20px}
+.row{display:grid;grid-template-columns:90px 1fr 48px;align-items:center;gap:8px;margin:12px 0;font-size:12px}
+.rowbar{height:7px;background:#eee;border-radius:8px;overflow:hidden}
+.rowfill{height:100%;width:0;background:linear-gradient(90deg,#c13ac6,#f48a54);transition:width .5s}
+.status{text-align:center;color:#777;font-size:11px;margin-top:17px}
+.stats{
+ max-width:1400px;margin:0 auto 50px;padding:0 4%;
+ display:grid;grid-template-columns:repeat(6,1fr);gap:1px;
+ background:#eee7df;border-radius:20px;overflow:hidden
+}
+.stat{background:#fff;padding:24px 15px;text-align:center}
+.stat b{display:block;font-size:16px;margin-bottom:5px}.stat span{font-size:12px;color:#777}
+@media(max-width:900px){
+ nav{display:none}.workspace{grid-template-columns:1fr}
+ .stats{grid-template-columns:repeat(2,1fr)}h1{letter-spacing:-2px}
+}
+@media(max-width:550px){
+ .hero{padding-top:40px}.buttons{flex-direction:column}
+ .stats{grid-template-columns:1fr 1fr}.camera-controls{flex-direction:column}
+}
+
+/* ================= HERO FACE ================= */
+
+.hero-visual{
+    height:570px;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    overflow:visible;
+}
+
+.glow{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(2px);
+    pointer-events:none;
+}
+
+.glow-one{
+    width:570px;height:570px;
+    right:0;top:0;
+    background:radial-gradient(circle,#ffd6df 0%,#ffe9df 38%,transparent 70%);
+}
+
+.glow-two{
+    width:350px;height:350px;
+    left:80px;bottom:20px;
+    background:radial-gradient(circle,#fff0c9,transparent 70%);
+}
+
+.portrait{
+    position:relative;
+    width:490px;
+    height:555px;
+    border-radius:245px 245px 20px 20px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 35%,#f5b08d 0 15%,transparent 16%),
+      linear-gradient(145deg,#241b1c,#49322d 45%,#88766a);
+    box-shadow:0 30px 70px rgba(40,30,30,.18);
+}
+
+.portrait-placeholder{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+}
+
+.person-head{
+    width:310px;
+    height:430px;
+    position:relative;
+    margin-bottom:35px;
+}
+
+.hair{
+    position:absolute;
+    width:300px;
+    height:410px;
+    left:5px;
+    top:5px;
+    border-radius:50% 50% 45% 45%;
+    background:linear-gradient(90deg,#1b1415,#382423,#171214);
+    box-shadow:inset -25px 0 30px rgba(255,255,255,.08);
+}
+
+.face{
+    position:absolute;
+    width:225px;
+    height:305px;
+    left:43px;
+    top:65px;
+    border-radius:48% 48% 45% 45%;
+    background:linear-gradient(145deg,#f4b18e,#d8846c);
+    box-shadow:inset -12px -10px 25px rgba(120,50,40,.12);
+}
+
+.eye{
+    position:absolute;
+    top:116px;
+    width:35px;
+    height:15px;
+    border-top:5px solid #35221f;
+    border-radius:50%;
+}
+.eye.left{left:42px}
+.eye.right{right:42px}
+
+.nose{
+    position:absolute;
+    left:105px;
+    top:135px;
+    width:17px;
+    height:55px;
+    border-right:3px solid rgba(130,65,55,.35);
+    border-radius:50%;
+}
+
+.smile{
+    position:absolute;
+    left:60px;
+    top:195px;
+    width:105px;
+    height:48px;
+    background:#fff;
+    border-radius:12px 12px 55px 55px;
+    box-shadow:inset 0 -10px 0 #e87373;
+}
+
+.face-corners i{
+    position:absolute;
+    width:38px;height:38px;
+    border-color:white;
+    border-style:solid;
+    z-index:5;
+}
+.face-corners .tl{left:70px;top:150px;border-width:4px 0 0 4px}
+.face-corners .tr{right:70px;top:150px;border-width:4px 4px 0 0}
+.face-corners .bl{left:70px;bottom:150px;border-width:0 0 4px 4px}
+.face-corners .br{right:70px;bottom:150px;border-width:0 4px 4px 0}
+
+.landmarks{
+    position:absolute;
+    left:115px;
+    top:205px;
+    width:260px;
+    line-height:54px;
+    color:rgba(255,255,255,.7);
+    font-size:12px;
+    letter-spacing:10px;
+    z-index:4;
+    text-align:center;
+}
+
+.detected-card{
+    position:absolute;
+    right:-25px;
+    top:130px;
+    width:215px;
+    padding:28px 25px;
+    background:rgba(255,255,255,.94);
+    border-radius:20px;
+    box-shadow:0 20px 50px rgba(40,30,30,.13);
+    text-align:center;
+    z-index:10;
+}
+
+.detected-title{
+    color:#555;
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.detected-emoji{font-size:55px}
+.detected-name{
+    color:#d43d86;
+    font-size:30px;
+    font-weight:800;
+    margin:7px 0 25px;
+}
+
+.detected-confidence{
+    color:#777;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.detected-card strong{
+    font-size:24px;
+}
+
+.detected-bar{
+    height:7px;
+    background:#eee;
+    border-radius:10px;
+    margin-top:12px;
+    overflow:hidden;
+}
+
+.detected-bar span{
+    display:block;
+    width:94.7%;
+    height:100%;
+    background:linear-gradient(90deg,#ae35df,#f37a58);
+}
+
+@media(max-width:900px){
+    .hero{
+        grid-template-columns:1fr;
+        min-height:auto;
+    }
+    .hero-visual{
+        margin-top:35px;
+        height:500px;
+    }
+}
+
+@media(max-width:550px){
+    .hero-visual{transform:scale(.78);transform-origin:top center;height:420px}
+    .portrait{width:390px;height:450px}
+    .detected-card{right:-10px}
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">
+  <div class="logo-icon">☺</div>
+  <div>EmotiVision<small>AI Emotion Detector</small></div>
+ </div>
+
+ <nav>
+  <a class="active" href="#">Home</a>
+  <a href="#features">Features</a>
+  <a href="#how">How It Works</a>
+  <a href="#">About</a>
+  <a href="#">Blog</a>
+  <a class="sign" href="#">♙ Sign In</a>
+  <button class="start" onclick="startCamera()">Get Started →</button>
+ </nav>
+</header>
+
+<section class="hero">
+ <span class="badge">✦ AI-Powered Emotion Detection</span>
+
+ <h1>Understand<br>Every <span class="gradient">Emotion</span></h1>
+
+ <p class="subtitle">
+  EmotiVision AI detects human emotions in real-time
+  with advanced deep learning and computer vision.
+ </p>
+
+ <div class="buttons">
+  <button class="btn primary" onclick="startCamera()">▣ Start Live Detection</button>
+  <button class="btn secondary" onclick="document.getElementById('upload').click()">⇧ Upload Image</button>
+  <input id="upload" type="file" accept="image/*" hidden>
+ </div>
+</section>
+
+
+<div class="hero-visual">
+
+  <div class="glow glow-one"></div>
+  <div class="glow glow-two"></div>
+
+  <div class="portrait">
+    <div class="portrait-placeholder">
+      <div class="person-head">
+        <div class="hair"></div>
+        <div class="face">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="nose"></div>
+          <div class="smile"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="face-corners">
+      <i class="tl"></i><i class="tr"></i>
+      <i class="bl"></i><i class="br"></i>
+    </div>
+
+    <div class="landmarks">
+      • • • • • • • • • • •
+      <br>• • • • • • • • • •
+      <br>• • • • • • • • • •
+    </div>
+  </div>
+
+  <div class="detected-card">
+    <div class="detected-title">Detected Emotion</div>
+    <div class="detected-emoji">😊</div>
+    <div class="detected-name">Happy</div>
+    <div class="detected-confidence">Confidence</div>
+    <strong>94.7%</strong>
+    <div class="detected-bar"><span></span></div>
+  </div>
+
+</div>
+
+<section class="workspace">
+
+ <div class="camera-card">
+  <div class="card-head">
+   <h2>Live Emotion Detection</h2>
+   <span class="live" id="liveText">CAMERA OFF</span>
+  </div>
+
+  <div class="video-wrap">
+   <video id="video" autoplay playsinline></video>
+   <div class="face-box" id="faceBox"></div>
+   <div class="scan" id="scan"></div>
+
+   <div class="camera-message" id="cameraMessage">
+    <div>
+     <div style="font-size:45px">📷</div>
+     <span>Click Start Live Detection</span>
+    </div>
+   </div>
+  </div>
+
+  <div class="camera-controls">
+   <button onclick="startCamera()">▶ Start Camera</button>
+   <button onclick="stopCamera()">■ Stop</button>
+  </div>
+ </div>
+
+ <div class="result-card">
+  <div class="card-head">
+   <h2>Detected Emotion</h2>
+   <span style="font-size:11px;color:#999">AI ANALYSIS</span>
+  </div>
+
+  <div class="overall">
+   <div class="emoji" id="emoji">🙂</div>
+   <div class="emotion-name" id="emotion">Waiting</div>
+   <div class="conf">Confidence <strong id="confidence">0%</strong></div>
+   <div class="bar"><div class="fill" id="mainFill"></div></div>
+  </div>
+
+  <div class="emotions" id="emotionList"></div>
+  <div class="status" id="status">Camera ready</div>
+ </div>
+
+</section>
+
+<section class="stats" id="features">
+ <div class="stat"><b>7 Emotions</b><span>Detected</span></div>
+ <div class="stat"><b>Real-time</b><span>Analysis</span></div>
+ <div class="stat"><b>95%+</b><span>AI Model</span></div>
+ <div class="stat"><b>DeepFace</b><span>Advanced Model</span></div>
+ <div class="stat"><b>Detailed</b><span>Insights</span></div>
+ <div class="stat"><b>Private</b><span>Secure Analysis</span></div>
+</section>
+
+<script>
+const video=document.getElementById("video");
+const upload=document.getElementById("upload");
+const emotionEl=document.getElementById("emotion");
+const confidenceEl=document.getElementById("confidence");
+const mainFill=document.getElementById("mainFill");
+const emotionList=document.getElementById("emotionList");
+const statusEl=document.getElementById("status");
+const cameraMessage=document.getElementById("cameraMessage");
+const faceBox=document.getElementById("faceBox");
+const scan=document.getElementById("scan");
+const liveText=document.getElementById("liveText");
+
+let stream=null;
+let timer=null;
+let busy=false;
+
+const icons={
+ happy:"😊",sad:"😢",angry:"😠",neutral:"😐",
+ fear:"😨",surprise:"😲",disgust:"🤢"
+};
+
+const names=["happy","sad","angry","neutral","fear","surprise","disgust"];
+
+function pretty(x){
+ return x.charAt(0).toUpperCase()+x.slice(1);
+}
+
+function showResult(data){
+ const emotion=String(data.emotion||"unknown").toLowerCase();
+ const confidence=Number(data.confidence||0);
+ const emotions=data.emotions||{};
+
+ emotionEl.textContent=pretty(emotion);
+ confidenceEl.textContent=confidence.toFixed(1)+"%";
+ mainFill.style.width=Math.min(100,confidence)+"%";
+ document.getElementById("emoji").textContent=icons[emotion]||"🙂";
+
+ emotionList.innerHTML="";
+ names.forEach(name=>{
+   const value=Number(emotions[name]||0);
+   emotionList.innerHTML+=`
+    <div class="row">
+      <span>${icons[name]} ${pretty(name)}</span>
+      <div class="rowbar"><div class="rowfill" style="width:${value}%"></div></div>
+      <b>${value.toFixed(1)}%</b>
+    </div>`;
+ });
+}
+
+async function analyzeBlob(blob){
+ if(busy)return;
+ busy=true;
+
+ try{
+  const form=new FormData();
+  form.append("image",blob,"camera.jpg");
+
+  const response=await fetch("/api/analyze-face",{
+   method:"POST",body:form
+  });
+
+  const data=await response.json();
+
+  if(!response.ok || data.error){
+   throw new Error(data.error||"Analysis failed");
+  }
+
+  showResult(data);
+  statusEl.textContent="Face detected • AI analysis complete";
+  faceBox.style.display="block";
+ }catch(error){
+  statusEl.textContent="No face detected — please look at camera";
+  faceBox.style.display="none";
+ }finally{
+  busy=false;
+ }
+}
+
+async function analyzeCamera(){
+ if(!stream)return;
+
+ const canvas=document.createElement("canvas");
+ canvas.width=video.videoWidth||640;
+ canvas.height=video.videoHeight||480;
+
+ const ctx=canvas.getContext("2d");
+ ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
+ canvas.toBlob(blob=>{
+  if(blob)analyzeBlob(blob);
+ },"image/jpeg",.82);
+}
+
+async function startCamera(){
+ try{
+  if(stream)stopCamera();
+
+  stream=await navigator.mediaDevices.getUserMedia({
+   video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},
+   audio:false
+  });
+
+  video.srcObject=stream;
+  cameraMessage.style.display="none";
+  scan.style.display="block";
+  liveText.textContent="LIVE";
+  liveText.style.color="#d83d8d";
+  statusEl.textContent="Camera active • Looking for face...";
+
+  timer=setInterval(analyzeCamera,2500);
+ }catch(error){
+  alert("Camera permission denied or camera unavailable.");
+  console.error(error);
+ }
+}
+
+function stopCamera(){
+ if(timer){clearInterval(timer);timer=null}
+ if(stream){
+  stream.getTracks().forEach(track=>track.stop());
+  stream=null;
+ }
+ video.srcObject=null;
+ cameraMessage.style.display="grid";
+ scan.style.display="none";
+ faceBox.style.display="none";
+ liveText.textContent="CAMERA OFF";
+ liveText.style.color="#ca3d65";
+ statusEl.textContent="Camera stopped";
+}
+
+upload.addEventListener("change",()=>{
+ const file=upload.files[0];
+ if(file){
+  statusEl.textContent="Analyzing uploaded image...";
+  analyzeBlob(file);
+ }
+});
+
+window.addEventListener("beforeunload",stopCamera);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmotiVision — AI Emotion Detector</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#fffaf7;
+    color:#111827;
+    overflow-x:hidden;
+}
+
+.navbar{
+    height:88px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 48px;
+    background:rgba(255,255,255,.88);
+    border-bottom:1px solid #eee8e5;
+    z-index:20;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-icon{
+    width:48px;
+    height:48px;
+    border:2px solid #d33b91;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#d33b91;
+    font-size:25px;
+}
+
+.logo-text strong{
+    display:block;
+    font-size:21px;
+    color:#172033;
+}
+
+.logo-text span{
+    display:block;
+    font-size:13px;
+    color:#777;
+    margin-top:2px;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:38px;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:#222;
+    font-size:15px;
+    font-weight:500;
+    padding:34px 0;
+}
+
+.nav-links a.active:after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:3px;
+    border-radius:5px;
+    background:linear-gradient(90deg,#a83de1,#ef6371);
+}
+
+.nav-actions{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.signin{
+    padding:13px 23px;
+    border:1px solid #e5e5e5;
+    background:white;
+    border-radius:14px;
+    font-weight:600;
+}
+
+.started{
+    border:0;
+    color:white;
+    font-weight:700;
+    padding:14px 25px;
+    border-radius:14px;
+    background:linear-gradient(100deg,#9636df,#ef626b);
+    cursor:pointer;
+}
+
+.hero{
+    min-height:755px;
+    padding:72px 56px 0;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 77% 45%,rgba(255,190,211,.42),transparent 32%),
+        radial-gradient(circle at 100% 60%,rgba(255,213,225,.38),transparent 35%),
+        linear-gradient(110deg,#fffaf5 0%,#fffaf8 45%,#fff1f5 100%);
+}
+
+.hero-inner{
+    max-width:1430px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:46% 54%;
+    align-items:center;
+    min-height:670px;
+}
+
+.hero-copy{
+    z-index:5;
+    padding-bottom:80px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#ffe7e2;
+    color:#b63d45;
+    padding:12px 19px;
+    border-radius:25px;
+    font-size:14px;
+    font-weight:700;
+    margin-bottom:28px;
+}
+
+.hero h1{
+    font-size:70px;
+    line-height:1.03;
+    letter-spacing:-3px;
+    max-width:650px;
+    margin-bottom:25px;
+    color:#111827;
+}
+
+.hero h1 span{
+    background:linear-gradient(90deg,#c32b91,#f16469);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.description{
+    color:#555;
+    font-size:19px;
+    line-height:1.65;
+    max-width:600px;
+    margin-bottom:32px;
+}
+
+.buttons{
+    display:flex;
+    gap:18px;
+    align-items:center;
+}
+
+.live-btn,
+.upload-btn{
+    height:62px;
+    padding:0 28px;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.live-btn{
+    color:white;
+    background:#131c2b;
+    border:0;
+}
+
+.upload-btn{
+    color:#151515;
+    background:white;
+    border:1px solid #ddd;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-family:inherit;
+}
+
+.upload-btn:hover{
+    transform:translateY(-1px);
+}
+
+.upload-btn:disabled{
+    opacity:.6;
+    cursor:wait;
+}
+
+.trusted{
+    margin-top:30px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#555;
+    font-size:14px;
+}
+
+.faces{
+    display:flex;
+}
+
+.faces span{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:2px solid white;
+    margin-left:-7px;
+    background:linear-gradient(135deg,#555,#ddd);
+}
+
+.faces span:first-child{
+    margin-left:0;
+}
+
+.hero-visual{
+    height:650px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:3;
+}
+
+.right-image{
+    width:min(780px,100%);
+    height:auto;
+    max-height:650px;
+    object-fit:contain;
+    object-position:center bottom;
+    transform:translateY(-250px);
+    display:block;
+    z-index:2;
+}
+
+.emotion-card{
+    position:absolute;
+    right:8px;
+    top:175px;
+    width:220px;
+    min-height:350px;
+    background:rgba(255,255,255,.94);
+    border-radius:20px;
+    box-shadow:0 20px 50px rgba(70,30,50,.12);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:26px;
+    z-index:5;
+    text-align:center;
+}
+
+.emotion-card small{
+    font-size:14px;
+    color:#777;
+    margin-bottom:25px;
+}
+
+.emoji{
+    font-size:66px;
+    line-height:1;
+    margin-bottom:18px;
+}
+
+.emotion-name{
+    font-size:35px;
+    font-weight:800;
+    background:linear-gradient(90deg,#cf328e,#ee646c);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:30px;
+}
+
+.confidence-label{
+    font-size:14px;
+    color:#777;
+    margin-bottom:8px;
+}
+
+.confidence{
+    font-size:25px;
+    font-weight:800;
+    color:#111827;
+    margin-bottom:14px;
+}
+
+.progress{
+    width:100%;
+    height:8px;
+    border-radius:10px;
+    background:#eee;
+    overflow:hidden;
+}
+
+.progress div{
+    width:94.7%;
+    height:100%;
+    border-radius:10px;
+    background:linear-gradient(90deg,#bd31cf,#ef6270,#f8a13c);
+}
+
+.stats{
+    position:absolute;
+    bottom:-101px;
+    left:0;
+    right:0;
+    background:#fff;
+    border-radius:32px 32px 0 0;
+    box-shadow:0 -8px 30px rgba(0,0,0,.04);
+    padding:30px 55px;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:15px;
+    z-index:10;
+}
+
+.stat{
+    min-height:75px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:0 18px;
+    border-right:1px solid #eee;
+}
+
+.stat:last-child{
+    border-right:0;
+}
+
+.stat-icon{
+    width:50px;
+    height:50px;
+    border:1px solid #eee;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    flex-shrink:0;
+}
+
+.stat strong{
+    display:block;
+    font-size:16px;
+    color:#172033;
+    line-height:1.35;
+}
+
+.stat span{
+    display:block;
+    font-size:14px;
+    color:#222;
+    margin-top:3px;
+}
+
+#fileInput{
+    display:none;
+}
+
+#camera{
+    display:none;
+}
+
+@media(max-width:1100px){
+    .nav-links{
+        gap:18px;
+    }
+
+    .hero h1{
+        font-size:56px;
+    }
+
+    .hero-inner{
+        grid-template-columns:48% 52%;
+    }
+
+    .emotion-card{
+        right:-10px;
+        transform:scale(.85);
+        transform-origin:top right;
+    }
+
+    .stats{
+        grid-template-columns:repeat(4,1fr);
+    }
+
+    .stat:nth-child(4){
+        border-right:0;
+    }
+}
+
+@media(max-width:800px){
+    .navbar{
+        padding:0 20px;
+    }
+
+    .nav-links{
+        display:none;
+    }
+
+    .hero{
+        padding:45px 25px 0;
+    }
+
+    .hero-inner{
+        grid-template-columns:1fr;
+    }
+
+    .hero-copy{
+        padding-bottom:20px;
+    }
+
+    .hero h1{
+        font-size:48px;
+        letter-spacing:-2px;
+    }
+
+    .hero-visual{
+        height:520px;
+    }
+
+    .emotion-card{
+        right:0;
+        top:100px;
+        transform:scale(.72);
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+        padding:25px;
+    }
+}
+
+<style>
+#cameraBox{
+    position:fixed;
+    inset:0;
+    background:rgba(8,12,20,.78);
+    z-index:99;
+    align-items:center;
+    justify-content:center;
+}
+
+#camera{
+    width:720px;
+    max-width:82vw;
+    max-height:78vh;
+    display:block;
+    border-radius:24px;
+    border:4px solid white;
+    box-shadow:0 25px 80px rgba(0,0,0,.35);
+    background:#111;
+}
+
+#liveEmotionCard{
+    position:fixed;
+    right:45px;
+    top:50%;
+    transform:translateY(-50%);
+    width:245px;
+    min-height:300px;
+    background:rgba(255,255,255,.97);
+    border-radius:22px;
+    padding:28px 24px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    z-index:101;
+}
+
+#liveEmotionCard .live-title{
+    font-size:14px;
+    color:#777;
+    margin-bottom:22px;
+}
+
+#liveEmoji{
+    font-size:65px;
+    margin-bottom:12px;
+}
+
+#liveEmotion{
+    font-size:32px;
+    font-weight:800;
+    background:linear-gradient(90deg,#c52d91,#ef646b);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:25px;
+}
+
+#liveConfidenceLabel{
+    color:#777;
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+#liveConfidence{
+    font-size:25px;
+    font-weight:800;
+    margin-bottom:14px;
+}
+
+#liveProgress{
+    width:100%;
+    height:8px;
+    background:#eee;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+#liveProgressBar{
+    width:0%;
+    height:100%;
+    border-radius:10px;
+    background:linear-gradient(90deg,#bd31cf,#ef6270,#f8a13c);
+    transition:width .3s ease;
+}
+
+#cameraStatus{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translateX(-50%);
+    color:white;
+    background:rgba(0,0,0,.65);
+    padding:10px 18px;
+    border-radius:20px;
+    font-size:14px;
+    z-index:102;
+}
+
+#closeCameraBtn{
+    position:fixed;
+    right:35px;
+    top:30px;
+    border:0;
+    background:white;
+    color:#111;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+    z-index:103;
+}
+</style>
+
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <div class="logo-icon">☺</div>
+        <div class="logo-text">
+            <strong>EmotiVision</strong>
+            <span>AI Emotion Detector</span>
+        </div>
+    </div>
+
+    <div class="nav-links">
+        <a href="/" class="active">Home</a>
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
+    </div>
+
+    <div class="nav-actions">
+        <a href="/auth?mode=login" class="signin">♙&nbsp; Sign In</a>
+        <a href="/auth?mode=signup" class="started">Get Started →</a>
+    </div>
+</nav>
+
+<main id="home">
+
+<section class="hero">
+
+<div class="hero-inner">
+
+<div class="hero-copy">
+
+<div class="badge">✦ AI-Powered Emotion Detection</div>
+
+<h1>
+Understand<br>
+Every <span>Emotion</span>
+</h1>
+
+<p class="description">
+EmotiVision AI detects human emotions in real-time with high accuracy using advanced deep learning and computer vision.
+</p>
+
+<div class="buttons">
+<button class="live-btn" onclick="startDetection()">▣&nbsp; Start Live Detection</button>
+
+<label class="upload-btn">
+⇧&nbsp; Upload Image
+<input id="fileInput" type="file" accept="image/*" onchange="uploadImage(event)">
+</label>
+</div>
+
+<div class="trusted">
+<div class="faces">
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+</div>
+<span>Trusted by 10,000+ users</span>
+</div>
+
+</div>
+
+<div class="hero-visual">
+
+<img src="{{ url_for('static', filename='Right.png') }}" class="right-image" alt="AI Emotion Detection">
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<div class="stats" id="features">
+
+<div class="stat">
+<div class="stat-icon">☺</div>
+<div><strong>7 Emotions</strong><span>Detected</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">◎</div>
+<div><strong>Real-time</strong><span>Analysis</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">♢</div>
+<div><strong>95%+</strong><span>Accuracy</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">✦</div>
+<div><strong>Advanced</strong><span>AI Model</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">▥</div>
+<div><strong>Detailed</strong><span>Insights</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">▢</div>
+<div><strong>Private &</strong><span>Secure</span></div>
+</div>
+
+<div class="stat">
+<div class="stat-icon">◉</div>
+<div><strong>Smart</strong><span>Detection</span></div>
+</div>
+
+</div>
+
+</section>
+
+<section id="how" style="height:200px;"></section>
+<section id="about" style="height:200px;"></section>
+<section id="blog" style="height:200px;"></section>
+
+</main>
+
+<div id="cameraBox" style="display:none;position:fixed;inset:0;background:rgba(10,15,25,.72);z-index:99;align-items:center;justify-content:center;">
+<video id="camera" autoplay playsinline></video>
+<button onclick="stopCamera()" style="position:fixed;right:35px;top:30px;border:0;background:white;color:#111;padding:12px 20px;border-radius:12px;font-weight:700;cursor:pointer;">Close Camera</button>
+</div>
+
+<script>
+
+async function startDetection(){
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video:true,
+            audio:false
+        });
+
+        const video = document.getElementById("camera");
+        const box = document.getElementById("cameraBox");
+        const status = document.getElementById("cameraStatus");
+
+        video.srcObject = stream;
+        box.style.display = "flex";
+
+        await video.play();
+
+        status.textContent = "AI is detecting your emotion...";
+
+        let detecting = false;
+
+        async function analyzeLiveFrame(){
+            if(!video.videoWidth || detecting){
+                return;
+            }
+
+            detecting = true;
+
+            try{
+                const canvas = document.createElement("canvas");
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(
+                    video,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(
+                        resolve,
+                        "image/jpeg",
+                        0.85
+                    );
+                });
+
+                if(!blob){
+                    detecting = false;
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append(
+                    "image",
+                    blob,
+                    "live-camera.jpg"
+                );
+
+                const response = await fetch(
+                    "/api/analyze-face",
+                    {
+                        method:"POST",
+                        body:formData
+                    }
+                );
+
+                const data = await response.json();
+
+                if(data.success){
+                    updateLiveEmotion(
+                        data.emotion,
+                        data.confidence
+                    );
+
+                    status.textContent =
+                        "Face detected • AI analyzing live";
+                }else{
+                    status.textContent =
+                        "No face detected — look at the camera";
+                }
+
+            }catch(error){
+                console.log("Emotion detection error:",error);
+
+                status.textContent =
+                    "AI detection error — retrying...";
+            }
+
+            detecting = false;
+        }
+
+        await analyzeLiveFrame();
+
+        window.liveEmotionTimer =
+            setInterval(
+                analyzeLiveFrame,
+                1500
+            );
+
+    }catch(error){
+        console.log(error);
+
+        alert(
+            "Camera permission allow karo. Browser Settings → Camera mein 127.0.0.1 ko Allow karo."
+        );
+    }
+}
+
+function updateLiveEmotion(emotion,confidence){
+
+    const names = {
+        happy:"Happy",
+        sad:"Sad",
+        angry:"Angry",
+        fear:"Fear",
+        surprise:"Surprise",
+        disgust:"Disgust",
+        neutral:"Neutral"
+    };
+
+    const emojis = {
+        happy:"😊",
+        sad:"😢",
+        angry:"😠",
+        fear:"😨",
+        surprise:"😮",
+        disgust:"🤢",
+        neutral:"😐"
+    };
+
+    const key =
+        String(emotion).toLowerCase();
+
+    const value =
+        Number(confidence || 0);
+
+    document.getElementById(
+        "liveEmotion"
+    ).textContent =
+        names[key] || emotion;
+
+    document.getElementById(
+        "liveEmoji"
+    ).textContent =
+        emojis[key] || "🙂";
+
+    document.getElementById(
+        "liveConfidence"
+    ).textContent =
+        value.toFixed(1) + "%";
+
+    document.getElementById(
+        "liveProgressBar"
+    ).style.width =
+        Math.min(value,100) + "%";
+}
+
+function stopCamera(){
+
+    if(window.liveEmotionTimer){
+        clearInterval(
+            window.liveEmotionTimer
+        );
+
+        window.liveEmotionTimer = null;
+    }
+
+    const video =
+        document.getElementById("camera");
+
+    const box =
+        document.getElementById("cameraBox");
+
+    if(video && video.srcObject){
+
+        video.srcObject
+            .getTracks()
+            .forEach(track => track.stop());
+
+        video.srcObject = null;
+    }
+
+    if(box){
+        box.style.display = "none";
+    }
+}
+
+
+const uploadButton = document.getElementById("uploadButton");
+const fileInput = document.getElementById("fileInput");
+
+if(uploadButton && fileInput){
+    uploadButton.addEventListener("click", function(){
+        fileInput.value = "";
+        fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function(event){
+        uploadImage(event);
+    });
+}
+
+async function uploadImage(event){
+    const file = event.target.files && event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    if(!file.type.startsWith("image/")){
+        alert("Please JPG, PNG ya WEBP image select karo.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file, file.name);
+
+    uploadButton.disabled = true;
+    uploadButton.textContent = "Analyzing...";
+
+    try{
+        const response = await fetch("/api/analyze-face",{
+            method:"POST",
+            body:formData
+        });
+
+        const data = await response.json();
+
+        if(data.success){
+            updateEmotion(data.emotion, data.confidence);
+        }else{
+            alert(data.error || "Face analyze nahi ho paya.");
+        }
+    }catch(error){
+        console.error("Upload error:", error);
+        alert("Server se connection nahi hua. Flask server check karo.");
+    }finally{
+        uploadButton.disabled = false;
+        uploadButton.innerHTML = "⇧&nbsp; Upload Image";
+    }
+}
+
+function updateEmotion(emotion,confidence){
+    const names = {
+        happy:"Happy",
+        sad:"Sad",
+        angry:"Angry",
+        fear:"Fear",
+        surprise:"Surprise",
+        disgust:"Disgust",
+        neutral:"Neutral"
+    };
+
+    const emojis = {
+        happy:"😊",
+        sad:"😢",
+        angry:"😠",
+        fear:"😨",
+        surprise:"😮",
+        disgust:"🤢",
+        neutral:"😐"
+    };
+
+    const key = String(emotion).toLowerCase();
+
+    document.getElementById("emotionName").textContent =
+        names[key] || emotion;
+
+    document.getElementById("emoji").textContent =
+        emojis[key] || "🙂";
+
+    const value = Number(confidence || 0);
+
+    document.getElementById("confidence").textContent =
+        value.toFixed(1) + "%";
+
+    document.getElementById("progressBar").style.width =
+        Math.min(value,100) + "%";
+}
+</script>
+
+
+<!-- LIVE_EMOTION_PANEL_START -->
+<style>
+.live-emotion-panel {
+    position: fixed;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 300px;
+    max-height: 72vh;
+    overflow-y: auto;
+    background: rgba(255,255,255,.97);
+    border: 1px solid rgba(20,30,45,.10);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 24px 70px rgba(20,30,45,.22);
+    z-index: 99999;
+    font-family: Arial, sans-serif;
+    display: none;
+}
+
+.live-emotion-panel.active {
+    display: block;
+}
+
+.live-emotion-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.live-emotion-title strong {
+    font-size: 20px;
+    color: #172033;
+}
+
+.live-emotion-status {
+    font-size: 11px;
+    font-weight: 700;
+    color: #e64270;
+    letter-spacing: .08em;
+}
+
+.live-emotion-main {
+    text-align: center;
+    padding: 12px 0 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 18px;
+}
+
+.live-emotion-emoji {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.live-emotion-name {
+    font-size: 28px;
+    font-weight: 800;
+    margin-top: 8px;
+    background: linear-gradient(90deg,#c52f91,#f06b61);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.live-emotion-confidence {
+    margin-top: 5px;
+    color: #6d7280;
+    font-size: 13px;
+}
+
+.live-emotion-row {
+    margin-bottom: 13px;
+}
+
+.live-emotion-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.live-emotion-row-head span:first-child {
+    font-size: 13px;
+    font-weight: 700;
+    color: #263043;
+}
+
+.live-emotion-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #777;
+}
+
+.live-emotion-bar {
+    height: 8px;
+    background: #ececf1;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.live-emotion-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    background: linear-gradient(90deg,#c32f9b,#f26b63,#ffad45);
+    transition: width .35s ease;
+}
+
+.live-emotion-error {
+    display: none;
+    padding: 10px;
+    border-radius: 12px;
+    background: #fff1f2;
+    color: #b4233d;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+    .live-emotion-panel {
+        right: 15px;
+        width: 260px;
+    }
+}
+
+@media (max-width: 800px) {
+    .live-emotion-panel {
+        position: fixed;
+        left: 15px;
+        right: 15px;
+        top: auto;
+        bottom: 15px;
+        transform: none;
+        width: auto;
+        max-height: 42vh;
+    }
+}
+</style>
+
+<div id="liveEmotionPanel" class="live-emotion-panel">
+    <div class="live-emotion-title">
+        <strong>Emotion Detection</strong>
+        <span id="liveEmotionStatus" class="live-emotion-status">LIVE</span>
+    </div>
+
+    <div class="live-emotion-main">
+        <div id="liveEmotionEmoji" class="live-emotion-emoji">😐</div>
+        <div id="liveEmotionName" class="live-emotion-name">Detecting...</div>
+        <div id="liveEmotionConfidence" class="live-emotion-confidence">Waiting for face...</div>
+    </div>
+
+    <div id="liveEmotionRows"></div>
+
+    <div id="liveEmotionError" class="live-emotion-error"></div>
+</div>
+
+<script>
+(function () {
+    const panel = document.getElementById("liveEmotionPanel");
+    const rows = document.getElementById("liveEmotionRows");
+    const emoji = document.getElementById("liveEmotionEmoji");
+    const name = document.getElementById("liveEmotionName");
+    const confidence = document.getElementById("liveEmotionConfidence");
+    const status = document.getElementById("liveEmotionStatus");
+    const errorBox = document.getElementById("liveEmotionError");
+
+    let video = null;
+    let canvas = null;
+    let ctx = null;
+    let timer = null;
+    let busy = false;
+
+    const emotionInfo = {
+        happy: { label: "Happy", emoji: "😄" },
+        sad: { label: "Sad", emoji: "😢" },
+        angry: { label: "Angry", emoji: "😠" },
+        fear: { label: "Fear", emoji: "😨" },
+        disgust: { label: "Disgust", emoji: "🤢" },
+        surprise: { label: "Surprise", emoji: "😲" },
+        neutral: { label: "Neutral", emoji: "😐" }
+    };
+
+    const order = [
+        "happy",
+        "sad",
+        "angry",
+        "excitement",
+        "surprise",
+        "fear",
+        "disgust",
+        "neutral"
+    ];
+
+    function makeRows() {
+        rows.innerHTML = "";
+
+        order.forEach(function (key) {
+            const row = document.createElement("div");
+            row.className = "live-emotion-row";
+
+            row.innerHTML =
+                '<div class="live-emotion-row-head">' +
+                    '<span>' + emotionLabel(key) + '</span>' +
+                    '<span class="live-emotion-value" id="emotionValue-' + key + '">0%</span>' +
+                '</div>' +
+                '<div class="live-emotion-bar">' +
+                    '<div class="live-emotion-fill" id="emotionFill-' + key + '"></div>' +
+                '</div>';
+
+            rows.appendChild(row);
+        });
+    }
+
+    function emotionLabel(key) {
+        if (key === "excitement") return "Excitement";
+        if (key === "surprise") return "Shock / Surprise";
+        return emotionInfo[key] ? emotionInfo[key].label : key;
+    }
+
+    function setEmotion(key, value) {
+        const safe = Math.max(0, Math.min(100, Number(value) || 0));
+        const fill = document.getElementById("emotionFill-" + key);
+        const valueEl = document.getElementById("emotionValue-" + key);
+
+        if (fill) fill.style.width = safe.toFixed(1) + "%";
+        if (valueEl) valueEl.textContent = safe.toFixed(1) + "%";
+    }
+
+    function showPanel() {
+        panel.classList.add("active");
+    }
+
+    function findVideo() {
+        const videos = Array.from(document.querySelectorAll("video"));
+
+        for (const v of videos) {
+            if (v.videoWidth > 0 || v.srcObject) {
+                return v;
+            }
+        }
+
+        return videos[0] || null;
+    }
+
+    function calculateExcitement(emotions) {
+        const happy = Number(emotions.happy || 0);
+        const surprise = Number(emotions.surprise || 0);
+
+        return Math.min(
+            100,
+            happy * 0.65 + surprise * 0.85
+        );
+    }
+
+    async function analyzeFrame() {
+        if (busy) return;
+
+        video = findVideo();
+
+        if (!video || !video.srcObject) {
+            return;
+        }
+
+        if (!video.videoWidth || !video.videoHeight) {
+            return;
+        }
+
+        busy = true;
+
+        try {
+            if (!canvas) {
+                canvas = document.createElement("canvas");
+                ctx = canvas.getContext("2d");
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            ctx.drawImage(
+                video,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            const blob = await new Promise(function (resolve) {
+                canvas.toBlob(resolve, "image/jpeg", 0.82);
+            });
+
+            if (!blob) {
+                busy = false;
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", blob, "camera.jpg");
+
+            const response = await fetch("/api/analyze-face", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Face analysis failed");
+            }
+
+            const emotions = data.emotions || {};
+            const dominant = String(data.emotion || "neutral").toLowerCase();
+            const confidenceValue = Number(data.confidence || 0);
+
+            let dominantKey = dominant;
+
+            if (dominant === "surprise") {
+                dominantKey = "surprise";
+            }
+
+            const info = emotionInfo[dominant] || {
+                label: dominant.charAt(0).toUpperCase() + dominant.slice(1),
+                emoji: "🙂"
+            };
+
+            emoji.textContent = info.emoji;
+            name.textContent = info.label;
+            confidence.textContent =
+                "Confidence: " + confidenceValue.toFixed(1) + "%";
+
+            order.forEach(function (key) {
+                let value = 0;
+
+                if (key === "excitement") {
+                    value = calculateExcitement(emotions);
+                } else {
+                    value = Number(emotions[key] || 0);
+                }
+
+                setEmotion(key, value);
+            });
+
+            status.textContent = "FACE DETECTED";
+            status.style.color = "#22a06b";
+            errorBox.style.display = "none";
+            showPanel();
+
+        } catch (err) {
+            status.textContent = "SEARCHING";
+            status.style.color = "#e64270";
+
+            errorBox.textContent =
+                "Face detect nahi hua. Camera me face clearly dikhaye.";
+
+            errorBox.style.display = "block";
+            showPanel();
+        }
+
+        busy = false;
+    }
+
+    function startEmotionDetection() {
+        showPanel();
+
+        if (!timer) {
+            timer = setInterval(analyzeFrame, 1200);
+        }
+
+        setTimeout(analyzeFrame, 500);
+    }
+
+    function stopEmotionDetection() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+
+        panel.classList.remove("active");
+    }
+
+    function watchCamera() {
+        const currentVideo = findVideo();
+
+        if (currentVideo && currentVideo !== video) {
+            video = currentVideo;
+
+            if (video.srcObject) {
+                startEmotionDetection();
+            }
+        }
+
+        if (video && video.srcObject) {
+            startEmotionDetection();
+        }
+    }
+
+    makeRows();
+
+    setInterval(watchCamera, 700);
+
+    const observer = new MutationObserver(function () {
+        watchCamera();
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    window.addEventListener("beforeunload", stopEmotionDetection);
+})();
+</script>
+<!-- LIVE_EMOTION_PANEL_END -->
+</body>
+</html>

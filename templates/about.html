@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About — EmotiVision</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#172033;
+    background:
+      radial-gradient(circle at 80% 15%,rgba(255,190,215,.35),transparent 30%),
+      linear-gradient(120deg,#fffaf5,#fff3f7);
+}
+a{text-decoration:none}
+.page-nav{
+    height:88px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 55px;
+    background:rgba(255,255,255,.94);
+    border-bottom:1px solid #eee;
+}
+.page-logo{
+    font-size:22px;
+    font-weight:800;
+    color:#172033;
+}
+.page-logo span{
+    color:#d23b91;
+}
+.page-nav-links{
+    display:flex;
+    gap:30px;
+}
+.page-nav-links a{
+    color:#222;
+    font-weight:600;
+}
+.page-nav-links a:hover{
+    color:#c53291;
+}
+.page-auth{
+    padding:12px 20px;
+    border-radius:12px;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(100deg,#9636df,#ef626b);
+}
+.page-wrap{
+    max-width:1200px;
+    margin:auto;
+    padding:80px 30px;
+}
+.eyebrow{
+    display:inline-block;
+    padding:9px 15px;
+    border-radius:30px;
+    background:#ffe6e3;
+    color:#b63d45;
+    font-weight:700;
+    font-size:13px;
+}
+.page-wrap h1{
+    font-size:58px;
+    line-height:1.05;
+    margin:22px 0;
+}
+.gradient{
+    background:linear-gradient(90deg,#c32b91,#f16469);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+.lead{
+    max-width:760px;
+    color:#5e6470;
+    font-size:19px;
+    line-height:1.7;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+    margin-top:45px;
+}
+.card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:22px;
+    padding:28px;
+    box-shadow:0 15px 40px rgba(20,30,45,.07);
+}
+.card-icon{
+    font-size:32px;
+    margin-bottom:18px;
+}
+.card h2{
+    margin:0 0 10px;
+}
+.card p{
+    color:#666;
+    line-height:1.65;
+}
+.step{
+    display:flex;
+    gap:22px;
+    align-items:flex-start;
+    margin:25px 0;
+}
+.step-no{
+    min-width:48px;
+    height:48px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:800;
+    background:linear-gradient(100deg,#9636df,#ef626b);
+}
+.footer{
+    text-align:center;
+    padding:35px;
+    color:#777;
+}
+@media(max-width:850px){
+    .page-nav{padding:0 20px}
+    .page-nav-links{display:none}
+    .page-wrap h1{font-size:42px}
+    .cards{grid-template-columns:1fr}
+}
+</style>
+
+<nav class="page-nav">
+    <a class="page-logo" href="/">Emoti<span>Vision</span></a>
+    <div class="page-nav-links">
+        <a href="/">Home</a>
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
+    </div>
+    <a class="page-auth" href="/auth?mode=login">Sign In</a>
+</nav>
+
+</head>
+<body>
+<div class="page-wrap">
+<span class="eyebrow">ABOUT EMOTIVISION</span>
+<h1>Built to make <span class="gradient">emotion AI simple.</span></h1>
+
+<div class="card" style="margin-top:35px">
+<h2>What is EmotiVision?</h2>
+<p>EmotiVision is an AI-powered facial expression detection project designed to identify visible emotional expressions from a camera feed or uploaded image.</p>
+<p>It combines a modern web interface, Flask backend, computer vision and DeepFace-based emotion analysis.</p>
+</div>
+
+<div class="cards">
+<div class="card">
+<div class="card-icon">👨‍💻</div>
+<h2>Created By</h2>
+<p><strong>Shreyansh Yadav</strong></p>
+<p>Project creator and developer of the EmotiVision AI emotion detection application.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🎯</div>
+<h2>Why it was created</h2>
+<p>The project was created to demonstrate how AI and computer vision can interpret visible facial expressions in an easy-to-use web application.</p>
+</div>
+
+<div class="card">
+<div class="card-icon">🚀</div>
+<h2>Benefits</h2>
+<p>It can help with AI demonstrations, academic projects, computer-vision learning, prototyping and emotion-aware interface experiments.</p>
+</div>
+</div>
+
+<div class="card" style="margin-top:25px">
+<h2>Important Note</h2>
+<p>Emotion prediction is an AI estimate based on visible facial patterns. It should not be treated as a medical or psychological diagnosis, and results can vary with lighting, camera quality and facial pose.</p>
+</div>
+</div>
+</body>
+</html>

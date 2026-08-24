@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How It Works — EmotiVision</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#172033;
+    background:
+      radial-gradient(circle at 80% 15%,rgba(255,190,215,.35),transparent 30%),
+      linear-gradient(120deg,#fffaf5,#fff3f7);
+}
+a{text-decoration:none}
+.page-nav{
+    height:88px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 55px;
+    background:rgba(255,255,255,.94);
+    border-bottom:1px solid #eee;
+}
+.page-logo{
+    font-size:22px;
+    font-weight:800;
+    color:#172033;
+}
+.page-logo span{
+    color:#d23b91;
+}
+.page-nav-links{
+    display:flex;
+    gap:30px;
+}
+.page-nav-links a{
+    color:#222;
+    font-weight:600;
+}
+.page-nav-links a:hover{
+    color:#c53291;
+}
+.page-auth{
+    padding:12px 20px;
+    border-radius:12px;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(100deg,#9636df,#ef626b);
+}
+.page-wrap{
+    max-width:1200px;
+    margin:auto;
+    padding:80px 30px;
+}
+.eyebrow{
+    display:inline-block;
+    padding:9px 15px;
+    border-radius:30px;
+    background:#ffe6e3;
+    color:#b63d45;
+    font-weight:700;
+    font-size:13px;
+}
+.page-wrap h1{
+    font-size:58px;
+    line-height:1.05;
+    margin:22px 0;
+}
+.gradient{
+    background:linear-gradient(90deg,#c32b91,#f16469);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+.lead{
+    max-width:760px;
+    color:#5e6470;
+    font-size:19px;
+    line-height:1.7;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+    margin-top:45px;
+}
+.card{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:22px;
+    padding:28px;
+    box-shadow:0 15px 40px rgba(20,30,45,.07);
+}
+.card-icon{
+    font-size:32px;
+    margin-bottom:18px;
+}
+.card h2{
+    margin:0 0 10px;
+}
+.card p{
+    color:#666;
+    line-height:1.65;
+}
+.step{
+    display:flex;
+    gap:22px;
+    align-items:flex-start;
+    margin:25px 0;
+}
+.step-no{
+    min-width:48px;
+    height:48px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:800;
+    background:linear-gradient(100deg,#9636df,#ef626b);
+}
+.footer{
+    text-align:center;
+    padding:35px;
+    color:#777;
+}
+@media(max-width:850px){
+    .page-nav{padding:0 20px}
+    .page-nav-links{display:none}
+    .page-wrap h1{font-size:42px}
+    .cards{grid-template-columns:1fr}
+}
+</style>
+
+<nav class="page-nav">
+    <a class="page-logo" href="/">Emoti<span>Vision</span></a>
+    <div class="page-nav-links">
+        <a href="/">Home</a>
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
+    </div>
+    <a class="page-auth" href="/auth?mode=login">Sign In</a>
+</nav>
+
+</head>
+<body>
+<div class="page-wrap">
+<span class="eyebrow">HOW IT WORKS</span>
+<h1>From camera to <span class="gradient">emotion insight.</span></h1>
+<p class="lead">EmotiVision turns a camera frame into an emotion prediction through a simple AI processing pipeline.</p>
+
+<div class="card" style="margin-top:40px">
+<div class="step"><div class="step-no">1</div><div><h2>Camera or Image</h2><p>The user starts the webcam or uploads an image containing a face.</p></div></div>
+<div class="step"><div class="step-no">2</div><div><h2>Frame Capture</h2><p>The browser captures a camera frame and sends it securely to the Flask backend.</p></div></div>
+<div class="step"><div class="step-no">3</div><div><h2>Face Detection</h2><p>The backend receives the image and uses computer vision to locate and analyze the face.</p></div></div>
+<div class="step"><div class="step-no">4</div><div><h2>Emotion Model</h2><p>DeepFace analyzes facial expressions and returns emotion probabilities.</p></div></div>
+<div class="step"><div class="step-no">5</div><div><h2>Result</h2><p>The interface displays the dominant emotion and confidence score.</p></div></div>
+</div>
+
+<div class="cards">
+<div class="card"><div class="card-icon">🎓</div><h2>Education</h2><p>Useful for demonstrating computer vision and AI concepts in projects and presentations.</p></div>
+<div class="card"><div class="card-icon">💻</div><h2>Human-Computer Interaction</h2><p>Can be used as a foundation for emotion-aware interfaces and experiments.</p></div>
+<div class="card"><div class="card-icon">📈</div><h2>Research & Prototyping</h2><p>Useful for testing emotion-analysis concepts before building larger systems.</p></div>
+</div>
+</div>
+</body>
+</html>
