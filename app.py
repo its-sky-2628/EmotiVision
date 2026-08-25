@@ -334,13 +334,14 @@ def analyze_face():
 
     except Exception as error:
 
-        print("\n======================================")
+        print("\n")
         print("DEEPFACE ANALYSIS ERROR")
-        print("======================================")
+        print("\n")
+       
 
         traceback.print_exc()
 
-        print("======================================\n")
+        print("\n")
 
         return jsonify({
             "success": False,
@@ -366,12 +367,12 @@ if __name__ == "__main__":
         )
     )
 
-    print("\n======================================")
+    print("\n")
     print("   FACE EMOTION DETECTION AI")
-    print("======================================")
+    print("\n")
     print("Server running at:")
     print(f"http://127.0.0.1:{port}")
-    print("======================================\n")
+    print("\n")
 
     app.run(
         debug=True,
