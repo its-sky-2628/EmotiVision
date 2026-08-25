@@ -10,3 +10,4 @@ Pillow
 joblib
 scikit-learn
 pandas
+retina-face

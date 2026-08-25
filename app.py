@@ -253,7 +253,7 @@ def analyze_face():
         results = DeepFace.analyze(
             img_path=frame,
             actions=["emotion"],
-            detector_backend="opencv",
+            detector_backend="retinaface",
             enforce_detection=False,
             silent=True
         )
