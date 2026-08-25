@@ -11,6 +11,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
+@app.route("/api/cv2-test")
+def cv2_test():
+    import cv2
+    return {
+        "cv2_file": str(getattr(cv2, "__file__", None)),
+        "cv2_version": str(getattr(cv2, "__version__", None)),
+        "cascade": str(hasattr(cv2, "CascadeClassifier")),
+        "cv2_dir_has_cascade": str("CascadeClassifier" in dir(cv2))
+    }
 app.secret_key = os.environ.get(
     "SECRET_KEY",
     "emotivision-development-secret"
