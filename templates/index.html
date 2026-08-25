@@ -1734,94 +1734,83 @@ async function startDetection(){
     let timer = null;
     let busy = false;
 
-    const emotionInfo = {
-        happy: { label: "Happy", emoji: "😄" },
-        sad: { label: "Sad", emoji: "😢" },
-        angry: { label: "Angry", emoji: "😠" },
-        fear: { label: "Fear", emoji: "😨" },
-        disgust: { label: "Disgust", emoji: "🤢" },
-        surprise: { label: "Surprise", emoji: "😲" },
-        neutral: { label: "Neutral", emoji: "😐" }
-    };
-
-    const order = [
-        "happy",
-        "sad",
-        "angry",
-        "excitement",
-        "surprise",
-        "fear",
-        "disgust",
-        "neutral"
+    const emotions = [
+        ["happy", "Happy"],
+        ["sad", "Sad"],
+        ["angry", "Angry"],
+        ["excitement", "Excitement"],
+        ["surprise", "Shock / Surprise"],
+        ["fear", "Fear"],
+        ["disgust", "Disgust"],
+        ["neutral", "Neutral"]
     ];
 
+    const emojis = {
+        happy: "😄",
+        sad: "😢",
+        angry: "😠",
+        fear: "😨",
+        disgust: "🤢",
+        surprise: "😲",
+        neutral: "😐"
+    };
+
     function makeRows() {
+        if (!rows) return;
+
         rows.innerHTML = "";
 
-        order.forEach(function (key) {
-            const row = document.createElement("div");
-            row.className = "live-emotion-row";
+        emotions.forEach(function(item) {
+            const key = item[0];
+            const label = item[1];
 
-            row.innerHTML =
-                '<div class="live-emotion-row-head">' +
-                    '<span>' + emotionLabel(key) + '</span>' +
-                    '<span class="live-emotion-value" id="emotionValue-' + key + '">0%</span>' +
-                '</div>' +
-                '<div class="live-emotion-bar">' +
-                    '<div class="live-emotion-fill" id="emotionFill-' + key + '"></div>' +
+            rows.innerHTML +=
+                '<div class="live-emotion-row">' +
+                    '<div class="live-emotion-row-head">' +
+                        '<span>' + label + '</span>' +
+                        '<span class="live-emotion-value" id="emotionValue-' + key + '">0%</span>' +
+                    '</div>' +
+                    '<div class="live-emotion-bar">' +
+                        '<div class="live-emotion-fill" id="emotionFill-' + key + '"></div>' +
+                    '</div>' +
                 '</div>';
-
-            rows.appendChild(row);
         });
     }
 
-    function emotionLabel(key) {
-        if (key === "excitement") return "Excitement";
-        if (key === "surprise") return "Shock / Surprise";
-        return emotionInfo[key] ? emotionInfo[key].label : key;
-    }
+    function updateEmotion(key, value) {
+        value = Math.max(0, Math.min(100, Number(value) || 0));
 
-    function setEmotion(key, value) {
-        const safe = Math.max(0, Math.min(100, Number(value) || 0));
-        const fill = document.getElementById("emotionFill-" + key);
         const valueEl = document.getElementById("emotionValue-" + key);
+        const fillEl = document.getElementById("emotionFill-" + key);
 
-        if (fill) fill.style.width = safe.toFixed(1) + "%";
-        if (valueEl) valueEl.textContent = safe.toFixed(1) + "%";
+        if (valueEl) valueEl.textContent = value.toFixed(1) + "%";
+        if (fillEl) fillEl.style.width = value + "%";
     }
 
-    function showPanel() {
-        panel.classList.add("active");
-    }
-
-    function findVideo() {
-        const videos = Array.from(document.querySelectorAll("video"));
+    function findCamera() {
+        const videos = document.querySelectorAll("video");
 
         for (const v of videos) {
-            if (v.videoWidth > 0 || v.srcObject) {
+            if (v.srcObject && v.videoWidth > 0) {
                 return v;
             }
         }
 
-        return videos[0] || null;
-    }
+        for (const v of videos) {
+            if (v.srcObject) {
+                return v;
+            }
+        }
 
-    function calculateExcitement(emotions) {
-        const happy = Number(emotions.happy || 0);
-        const surprise = Number(emotions.surprise || 0);
-
-        return Math.min(
-            100,
-            happy * 0.65 + surprise * 0.85
-        );
+        return null;
     }
 
     async function analyzeFrame() {
         if (busy) return;
 
-        video = findVideo();
+        video = findCamera();
 
-        if (!video || !video.srcObject) {
+        if (!video) {
             return;
         }
 
@@ -1848,129 +1837,177 @@ async function startDetection(){
                 canvas.height
             );
 
-            const blob = await new Promise(function (resolve) {
-                canvas.toBlob(resolve, "image/jpeg", 0.82);
+            const blob = await new Promise(function(resolve) {
+                canvas.toBlob(
+                    resolve,
+                    "image/jpeg",
+                    0.80
+                );
             });
 
             if (!blob) {
-                busy = false;
-                return;
+                throw new Error("Could not capture camera frame");
             }
 
             const formData = new FormData();
             formData.append("image", blob, "camera.jpg");
 
-            const response = await fetch("/api/analyze-face", {
-                method: "POST",
-                body: formData
-            });
+            console.log("Sending frame to /api/analyze-face...");
+
+            const response = await fetch(
+                "/api/analyze-face",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
 
             const data = await response.json();
 
-            if (!response.ok || !data.success) {
+            console.log("Emotion API response:", data);
+
+            if (!response.ok) {
+                throw new Error(data.error || "Server error " + response.status);
+            }
+
+            if (!data.success) {
+                if (data.error === "No face detected") {
+                    name.textContent = "No Face";
+                    confidence.textContent = "Waiting for face...";
+
+                    emotions.forEach(function(item) {
+                        updateEmotion(item[0], 0);
+                    });
+
+                    status.textContent = "SEARCHING";
+                    status.style.color = "";
+                    return;
+                }
+
                 throw new Error(data.error || "Face analysis failed");
             }
 
-            const emotions = data.emotions || {};
-            const dominant = String(data.emotion || "neutral").toLowerCase();
-            const confidenceValue = Number(data.confidence || 0);
+            const detectedEmotion =
+                String(data.emotion || "neutral").toLowerCase();
 
-            let dominantKey = dominant;
+            const detectedConfidence =
+                Number(data.confidence || 0);
 
-            if (dominant === "surprise") {
-                dominantKey = "surprise";
-            }
+            const emotionData =
+                data.emotions || {};
 
-            const info = emotionInfo[dominant] || {
-                label: dominant.charAt(0).toUpperCase() + dominant.slice(1),
-                emoji: "🙂"
-            };
+            emoji.textContent =
+                emojis[detectedEmotion] || "🙂";
 
-            emoji.textContent = info.emoji;
-            name.textContent = info.label;
+            name.textContent =
+                detectedEmotion.charAt(0).toUpperCase() +
+                detectedEmotion.slice(1);
+
             confidence.textContent =
-                "Confidence: " + confidenceValue.toFixed(1) + "%";
+                "Confidence: " +
+                detectedConfidence.toFixed(1) +
+                "%";
 
-            order.forEach(function (key) {
+            emotions.forEach(function(item) {
+                const key = item[0];
+
                 let value = 0;
 
                 if (key === "excitement") {
-                    value = calculateExcitement(emotions);
+                    const happy =
+                        Number(emotionData.happy || 0);
+
+                    const surprise =
+                        Number(emotionData.surprise || 0);
+
+                    value = Math.min(
+                        100,
+                        happy * 0.65 +
+                        surprise * 0.85
+                    );
                 } else {
-                    value = Number(emotions[key] || 0);
+                    value =
+                        Number(emotionData[key] || 0);
                 }
 
-                setEmotion(key, value);
+                updateEmotion(key, value);
             });
 
             status.textContent = "FACE DETECTED";
             status.style.color = "#22a06b";
-            errorBox.style.display = "none";
-            showPanel();
 
-        } catch (err) {
-            status.textContent = "SEARCHING";
-            status.style.color = "#e64270";
+            if (panel) {
+                panel.classList.add("active");
+            }
 
-            errorBox.textContent =
-                "Face detect nahi hua. Camera me face clearly dikhaye.";
+            if (errorBox) {
+                errorBox.textContent = "";
+                errorBox.style.display = "none";
+            }
 
-            errorBox.style.display = "block";
-            showPanel();
+        } catch (error) {
+            console.error(
+                "Live emotion detection error:",
+                error
+            );
+
+            if (errorBox) {
+                errorBox.textContent =
+                    "Detection error: " + error.message;
+                errorBox.style.display = "block";
+            }
+
+            status.textContent = "ERROR";
+            status.style.color = "#d93025";
+
+        } finally {
+            busy = false;
         }
-
-        busy = false;
     }
 
-    function startEmotionDetection() {
-        showPanel();
-
-        if (!timer) {
-            timer = setInterval(analyzeFrame, 1200);
+    function startLiveDetection() {
+        if (timer) {
+            clearInterval(timer);
         }
 
-        setTimeout(analyzeFrame, 500);
+        console.log("Starting live emotion detection...");
+
+        timer = setInterval(
+            analyzeFrame,
+            1500
+        );
+
+        setTimeout(
+            analyzeFrame,
+            500
+        );
     }
 
-    function stopEmotionDetection() {
+    window.startEmotionDetection = startLiveDetection;
+
+    window.stopEmotionDetection = function() {
         if (timer) {
             clearInterval(timer);
             timer = null;
         }
 
-        panel.classList.remove("active");
-    }
-
-    function watchCamera() {
-        const currentVideo = findVideo();
-
-        if (currentVideo && currentVideo !== video) {
-            video = currentVideo;
-
-            if (video.srcObject) {
-                startEmotionDetection();
-            }
-        }
-
-        if (video && video.srcObject) {
-            startEmotionDetection();
-        }
-    }
+        busy = false;
+    };
 
     makeRows();
 
-    setInterval(watchCamera, 700);
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+            startLiveDetection();
+        }
+    );
 
-    const observer = new MutationObserver(function () {
-        watchCamera();
-    });
+    setTimeout(
+        startLiveDetection,
+        2000
+    );
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    window.addEventListener("beforeunload", stopEmotionDetection);
 })();
 </script>
 <!-- LIVE_EMOTION_PANEL_END -->
