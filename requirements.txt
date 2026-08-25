@@ -2,7 +2,6 @@ Flask
 flask-cors
 gunicorn
 numpy
-opencv-python-headless==4.10.0.84
 deepface==0.0.100
 tensorflow==2.19.0
 tf-keras==2.19.0
@@ -11,3 +10,4 @@ joblib
 scikit-learn
 pandas
 retina-face
+opencv-python-headless==4.10.0.84
