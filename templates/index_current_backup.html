@@ -824,420 +824,56 @@ EmotiVision AI detects human emotions in real-time with high accuracy using adva
 </main>
 
 <div id="cameraBox" style="display:none;position:fixed;inset:0;background:rgba(10,15,25,.72);z-index:99;align-items:center;justify-content:center;">
-<video id="camera" autoplay playsinline></video>
-<!-- LIVE_EMOTION_PANEL_START -->
-<style>
-.live-emotion-panel {
-    position: fixed;
-    right: 32px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 300px;
-    max-height: 72vh;
-    overflow-y: auto;
-    background: rgba(255,255,255,.97);
-    border: 1px solid rgba(20,30,45,.10);
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 24px 70px rgba(20,30,45,.22);
-    z-index: 99999;
-    font-family: Arial, sans-serif;
-    display: none;
-}
-
-.live-emotion-panel.active {
-    display: block;
-}
-
-.live-emotion-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-}
-
-.live-emotion-title strong {
-    font-size: 20px;
-    color: #172033;
-}
-
-.live-emotion-status {
-    font-size: 11px;
-    font-weight: 700;
-    color: #e64270;
-    letter-spacing: .08em;
-}
-
-.live-emotion-main {
-    text-align: center;
-    padding: 12px 0 20px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 18px;
-}
-
-.live-emotion-emoji {
-    font-size: 48px;
-    line-height: 1;
-}
-
-.live-emotion-name {
-    font-size: 28px;
-    font-weight: 800;
-    margin-top: 8px;
-    background: linear-gradient(90deg,#c52f91,#f06b61);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.live-emotion-confidence {
-    margin-top: 5px;
-    color: #6d7280;
-    font-size: 13px;
-}
-
-.live-emotion-row {
-    margin-bottom: 13px;
-}
-
-.live-emotion-row-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.live-emotion-row-head span:first-child {
-    font-size: 13px;
-    font-weight: 700;
-    color: #263043;
-}
-
-.live-emotion-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: #777;
-}
-
-.live-emotion-bar {
-    height: 8px;
-    background: #ececf1;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.live-emotion-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 20px;
-    background: linear-gradient(90deg,#c32f9b,#f26b63,#ffad45);
-    transition: width .35s ease;
-}
-
-.live-emotion-error {
-    display: none;
-    padding: 10px;
-    border-radius: 12px;
-    background: #fff1f2;
-    color: #b4233d;
-    font-size: 12px;
-    line-height: 1.4;
-    margin-top: 12px;
-}
-
-@media (max-width: 1100px) {
-    .live-emotion-panel {
-        right: 15px;
-        width: 260px;
-    }
-}
-
-@media (max-width: 800px) {
-    .live-emotion-panel {
-        position: fixed;
-        left: 15px;
-        right: 15px;
-        top: auto;
-        bottom: 15px;
-        transform: none;
-        width: auto;
-        max-height: 42vh;
-    }
-}
-</style>
-
-<div id="liveEmotionPanel" class="live-emotion-panel">
-    <div class="live-emotion-title">
-        <strong>Emotion Detection</strong>
-        <span id="liveEmotionStatus" class="live-emotion-status">LIVE</span>
+<div class="camera-layout">
+    <div class="camera-preview">
+        <video id="camera" autoplay playsinline></video>
+        <div id="cameraStatus">Starting camera...</div>
     </div>
 
-    <div class="live-emotion-main">
-        <div id="liveEmotionEmoji" class="live-emotion-emoji">😐</div>
-        <div id="liveEmotionName" class="live-emotion-name">Detecting...</div>
-        <div id="liveEmotionConfidence" class="live-emotion-confidence">Waiting for face...</div>
+    <div id="liveEmotionCard" class="live-emotion-card">
+        <div class="live-title">Emotion Detection</div>
+
+        <div class="face-status">
+            <span class="status-dot"></span>
+            <strong id="liveFaceStatus">FACE DETECTED</strong>
+        </div>
+
+        <div class="detected-emotion">
+            <div id="liveEmotionEmoji" class="emotion-emoji">😊</div>
+            <div>
+                <div class="emotion-label">Detected Emotion</div>
+                <div id="liveEmotion">Waiting...</div>
+            </div>
+        </div>
+
+        <div id="liveEmotionConfidence" class="live-emotion-confidence">
+            Confidence: 0%
+        </div>
+
+        <div class="emotion-bars">
+            <div><span>Happy</span><span id="barHappyValue">0%</span></div>
+            <div class="bar"><i id="barHappy"></i></div>
+
+            <div><span>Sad</span><span id="barSadValue">0%</span></div>
+            <div class="bar"><i id="barSad"></i></div>
+
+            <div><span>Angry</span><span id="barAngryValue">0%</span></div>
+            <div class="bar"><i id="barAngry"></i></div>
+
+            <div><span>Excitement</span><span id="barExcitementValue">0%</span></div>
+            <div class="bar"><i id="barExcitement"></i></div>
+
+            <div><span>Shock / Surprise</span><span id="barSurpriseValue">0%</span></div>
+            <div class="bar"><i id="barSurprise"></i></div>
+
+            <div><span>Fear</span><span id="barFearValue">0%</span></div>
+            <div class="bar"><i id="barFear"></i></div>
+
+            <div><span>Disgust</span><span id="barDisgustValue">0%</span></div>
+            <div class="bar"><i id="barDisgust"></i></div>
+        </div>
     </div>
-
-    <div id="liveEmotionRows"></div>
-
-    <div id="liveEmotionError" class="live-emotion-error"></div>
 </div>
-
-<script>
-(function () {
-    const panel = document.getElementById("liveEmotionPanel");
-    const rows = document.getElementById("liveEmotionRows");
-    const emoji = document.getElementById("liveEmotionEmoji");
-    const name = document.getElementById("liveEmotionName");
-    const confidence = document.getElementById("liveEmotionConfidence");
-    const status = document.getElementById("liveEmotionStatus");
-    const errorBox = document.getElementById("liveEmotionError");
-
-    let video = null;
-    let canvas = null;
-    let ctx = null;
-    let timer = null;
-    let busy = false;
-
-    const emotionInfo = {
-        happy: { label: "Happy", emoji: "😄" },
-        sad: { label: "Sad", emoji: "😢" },
-        angry: { label: "Angry", emoji: "😠" },
-        fear: { label: "Fear", emoji: "😨" },
-        disgust: { label: "Disgust", emoji: "🤢" },
-        surprise: { label: "Surprise", emoji: "😲" },
-        neutral: { label: "Neutral", emoji: "😐" }
-    };
-
-    const order = [
-        "happy",
-        "sad",
-        "angry",
-        "excitement",
-        "surprise",
-        "fear",
-        "disgust",
-        "neutral"
-    ];
-
-    function makeRows() {
-        rows.innerHTML = "";
-
-        order.forEach(function (key) {
-            const row = document.createElement("div");
-            row.className = "live-emotion-row";
-
-            row.innerHTML =
-                '<div class="live-emotion-row-head">' +
-                    '<span>' + emotionLabel(key) + '</span>' +
-                    '<span class="live-emotion-value" id="emotionValue-' + key + '">0%</span>' +
-                '</div>' +
-                '<div class="live-emotion-bar">' +
-                    '<div class="live-emotion-fill" id="emotionFill-' + key + '"></div>' +
-                '</div>';
-
-            rows.appendChild(row);
-        });
-    }
-
-    function emotionLabel(key) {
-        if (key === "excitement") return "Excitement";
-        if (key === "surprise") return "Shock / Surprise";
-        return emotionInfo[key] ? emotionInfo[key].label : key;
-    }
-
-    function setEmotion(key, value) {
-        const safe = Math.max(0, Math.min(100, Number(value) || 0));
-        const fill = document.getElementById("emotionFill-" + key);
-        const valueEl = document.getElementById("emotionValue-" + key);
-
-        if (fill) fill.style.width = safe.toFixed(1) + "%";
-        if (valueEl) valueEl.textContent = safe.toFixed(1) + "%";
-    }
-
-    function showPanel() {
-        panel.classList.add("active");
-    }
-
-    function findVideo() {
-        const videos = Array.from(document.querySelectorAll("video"));
-
-        for (const v of videos) {
-            if (v.videoWidth > 0 || v.srcObject) {
-                return v;
-            }
-        }
-
-        return videos[0] || null;
-    }
-
-    function calculateExcitement(emotions) {
-        const happy = Number(emotions.happy || 0);
-        const surprise = Number(emotions.surprise || 0);
-
-        return Math.min(
-            100,
-            happy * 0.65 + surprise * 0.85
-        );
-    }
-
-    async function analyzeFrame() {
-        if (busy) return;
-
-        video = findVideo();
-
-        if (!video || !video.srcObject) {
-            return;
-        }
-
-        if (!video.videoWidth || !video.videoHeight) {
-            return;
-        }
-
-        busy = true;
-
-        try {
-            if (!canvas) {
-                canvas = document.createElement("canvas");
-                ctx = canvas.getContext("2d");
-            }
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            ctx.drawImage(
-                video,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-            const blob = await new Promise(function (resolve) {
-                canvas.toBlob(resolve, "image/jpeg", 0.82);
-            });
-
-            if (!blob) {
-                busy = false;
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("image", blob, "camera.jpg");
-
-            const response = await fetch("/api/analyze-face", {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || "Face analysis failed");
-            }
-
-            const emotions = data.emotions || {};
-            const dominant = String(data.emotion || "neutral").toLowerCase();
-            const confidenceValue = Number(data.confidence || 0);
-
-            let dominantKey = dominant;
-
-            if (dominant === "surprise") {
-                dominantKey = "surprise";
-            }
-
-            const info = emotionInfo[dominant] || {
-                label: dominant.charAt(0).toUpperCase() + dominant.slice(1),
-                emoji: "🙂"
-            };
-
-            emoji.textContent = info.emoji;
-            name.textContent = info.label;
-            confidence.textContent =
-                "Confidence: " + confidenceValue.toFixed(1) + "%";
-
-            order.forEach(function (key) {
-                let value = 0;
-
-                if (key === "excitement") {
-                    value = calculateExcitement(emotions);
-                } else {
-                    value = Number(emotions[key] || 0);
-                }
-
-                setEmotion(key, value);
-            });
-
-            status.textContent = "FACE DETECTED";
-            status.style.color = "#22a06b";
-            errorBox.style.display = "none";
-            showPanel();
-
-        } catch (err) {
-            status.textContent = "SEARCHING";
-            status.style.color = "#e64270";
-
-            errorBox.textContent =
-                "Face detect nahi hua. Camera me face clearly dikhaye.";
-
-            errorBox.style.display = "block";
-            showPanel();
-        }
-
-        busy = false;
-    }
-
-    function startEmotionDetection() {
-        showPanel();
-
-        if (!timer) {
-            timer = setInterval(analyzeFrame, 1200);
-        }
-
-        setTimeout(analyzeFrame, 500);
-    }
-
-    function stopEmotionDetection() {
-        if (timer) {
-            clearInterval(timer);
-            timer = null;
-        }
-
-        panel.classList.remove("active");
-    }
-
-    function watchCamera() {
-        const currentVideo = findVideo();
-
-        if (currentVideo && currentVideo !== video) {
-            video = currentVideo;
-
-            if (video.srcObject) {
-                startEmotionDetection();
-            }
-        }
-
-        if (video && video.srcObject) {
-            startEmotionDetection();
-        }
-    }
-
-    makeRows();
-
-    setInterval(watchCamera, 700);
-
-    const observer = new MutationObserver(function () {
-        watchCamera();
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    window.addEventListener("beforeunload", stopEmotionDetection);
-})();
-</script>
-<!-- LIVE_EMOTION_PANEL_END -->
 <button onclick="stopCamera()" style="position:fixed;right:35px;top:30px;border:0;background:white;color:#111;padding:12px 20px;border-radius:12px;font-weight:700;cursor:pointer;">Close Camera</button>
 </div>
 
