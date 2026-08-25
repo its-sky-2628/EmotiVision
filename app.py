@@ -18,6 +18,11 @@ app.secret_key = os.environ.get(
 
 CORS(app)
 
+# Ensure OpenCV Haar Cascade is available for DeepFace
+CASCADE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cv2_data", "haarcascade_frontalface_default.xml")
+if os.path.exists(CASCADE_PATH):
+    cv2.data.haarcascades = os.path.dirname(CASCADE_PATH) + os.sep
+
 
 def init_auth_db():
     conn = sqlite3.connect("users.db")
